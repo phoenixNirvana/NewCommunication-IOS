@@ -1,0 +1,171 @@
+//
+//  YURLRequestModel.m
+//  yushiyi
+//
+//  Created by yu shiyi on 12-7-30.
+//  Copyright (c) 2012年 __MyCompanyName__. All rights reserved.
+//
+
+#import "YURLRequestModel.h"
+
+#import "YURLRequest.h"
+#import "YURLRequestQueue.h"
+#import "YURLCache.h"
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////
+@implementation YURLRequestModel
+
+@synthesize loadedTime  = _loadedTime;
+@synthesize cacheKey    = _cacheKey;
+@synthesize hasNoMore   = _hasNoMore;
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+- (void)dealloc {
+    [[YURLRequestQueue mainQueue] cancelRequestsWithDelegate:self];
+    [_loadingRequest cancel];
+    
+    LY_RELEASE_SAFELY(_loadingRequest);
+    LY_RELEASE_SAFELY(_loadedTime);
+    LY_RELEASE_SAFELY(_cacheKey);
+    
+    [super dealloc];
+}
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+- (void)reset {
+    LY_RELEASE_SAFELY(_cacheKey);
+    LY_RELEASE_SAFELY(_loadedTime);
+}
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark -
+#pragma mark TTModel
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+- (BOOL)isLoaded {
+    return !!_loadedTime;
+}
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+- (BOOL)isLoading {
+    return !!_loadingRequest;
+}
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+- (BOOL)isLoadingMore {
+    return _isLoadingMore;
+}
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+- (BOOL)isOutdated {
+    if (nil == _cacheKey) {
+        return nil != _loadedTime;
+        
+    } else {
+        NSDate* loadedTime = self.loadedTime;
+        
+        if (nil != loadedTime) {
+            return -[loadedTime timeIntervalSinceNow] > [YURLCache sharedCache].invalidationAge;
+            
+        } else {
+            return NO;
+        }
+    }
+}
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+- (void)cancel {
+    [_loadingRequest cancel];
+}
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+- (void)invalidate:(BOOL)erase {
+    if (nil != _cacheKey) {
+        if (erase) {
+            [[YURLCache sharedCache] removeKey:_cacheKey];
+            
+        } else {
+            [[YURLCache sharedCache] invalidateKey:_cacheKey];
+        }
+        
+        LY_RELEASE_SAFELY(_cacheKey);
+    }
+}
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////
+#pragma mark -
+#pragma mark YURLRequestDelegate
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+- (void)requestDidStartLoad:(YURLRequest*)request {
+    [_loadingRequest release];
+    _loadingRequest = [request retain];
+    [self didStartLoad];
+}
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+- (void)requestDidFinishLoad:(YURLRequest*)request {
+    if (!self.isLoadingMore) {
+        [_loadedTime release];
+        _loadedTime = [request.timestamp retain];
+        self.cacheKey = request.cacheKey;
+    }
+    
+    LY_RELEASE_SAFELY(_loadingRequest);
+    [self didFinishLoad];
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+- (void)requestDidFinishLoad304:(YURLRequest*)request {
+    LY_RELEASE_SAFELY(_loadingRequest);
+    [self didFinishLoad304];
+}
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+- (void)request:(YURLRequest*)request didFailLoadWithError:(NSError*)error {
+    LY_RELEASE_SAFELY(_loadingRequest);
+    [self didFailLoadWithError:error];
+}
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+- (void)requestDidCancelLoad:(YURLRequest*)request {
+    LY_RELEASE_SAFELY(_loadingRequest);
+    [self didCancelLoad];
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+- (float)downloadProgress {
+    if ([self isLoading]) {
+        if (!_loadingRequest.totalContentLength) {
+            return 0;
+        }
+        return (float)_loadingRequest.totalBytesDownloaded / (float)_loadingRequest.totalContentLength;
+    }
+    return 0.0f;
+}
+
+- (void)refreshData:(YURLRequestCachePolicy)cachePolicy
+{
+    
+}
+
+@end
