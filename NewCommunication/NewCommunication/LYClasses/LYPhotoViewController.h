@@ -23,10 +23,12 @@
     AVCaptureDevice *_device;
     
     UIImage *_finishImage;
+    UIImage *_effectImage;
     
     
     UIImageView *_photoImageView;
     UIScrollView *_watermarkScroll;
+    UIScrollView *_imageEffectScroll;
     UIView *_cameraView;
     UIButton *_takePhotoButton;
     UIButton *_flashButton;
@@ -38,12 +40,15 @@
     NSInteger currentPageIndex;
     NSInteger totalPages;
     NSMutableArray * _imageNameArr;
-
     
+    
+    UIButton *_effectButton;
+    NSInteger effectTag;
 }
 @property (nonatomic,retain) UIImagePickerController *imagePickerController;
-
+@property (nonatomic,retain) UIImage *effectImage;
 @property (nonatomic,retain) UIScrollView *watermarkScroll;
+@property (nonatomic,retain) UIScrollView *imageEffectScroll;
 @property (nonatomic,retain) UIImageView *photoImageView;
 @property (nonatomic,retain) UIView *cameraView;
 @property (nonatomic,retain) UIButton *takePhotoButton;
@@ -52,5 +57,6 @@
 @property (nonatomic,retain) UIButton *okButton;
 @property (nonatomic,retain) UIButton *cancelButton;
 @property (nonatomic,retain) UIButton *selectPhotoButton;
+@property (nonatomic,retain) UIButton *effectButton;
 @property(nonatomic,retain)  NSMutableArray * imageNameArr;
 @end

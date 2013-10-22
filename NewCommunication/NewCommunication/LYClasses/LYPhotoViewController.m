@@ -10,7 +10,7 @@
 #import "LYSharePhotoViewController.h"
 #define bottom_height 60
 #define top_height 40
-
+#import "LYColorMatrix.h"
 @interface LYPhotoViewController ()
 
 @end
@@ -27,7 +27,10 @@
 @synthesize selectPhotoButton = _selectPhotoButton;
 @synthesize photoImageView = _photoImageView;
 @synthesize watermarkScroll = _watermarkScroll;
+@synthesize imageEffectScroll = _imageEffectScroll;
 @synthesize imageNameArr =_imageNameArr;
+@synthesize effectButton = _effectButton;
+@synthesize effectImage = _effectImage;
 - (void)dealloc
 {
     self.imagePickerController = nil;
@@ -41,7 +44,9 @@
     self.photoImageView = nil;
     self.watermarkScroll = nil;
     self.imageNameArr = nil;
-    
+    self.effectButton = nil;
+    self.imageEffectScroll = nil;
+    self.effectImage = nil;
     [super dealloc];
 }
 - (void)loadView
@@ -60,7 +65,7 @@
     _preview.videoGravity = AVLayerVideoGravityResizeAspectFill;
     
     [self.cameraView.layer addSublayer:_preview];
-    
+    effectTag = 1;
     
     UIImageView *imgaView = [[UIImageView alloc] init];
     [imgaView setBackgroundColor:[UIColor clearColor]];
@@ -70,6 +75,8 @@
     [imgaView release];
     
     [self initWaterScroll];
+    [self initEffectScroll];
+    
     
     [self creatFlashAndPositionBtn];
 }
@@ -90,6 +97,7 @@
 - (void)beginTakePhoto
 {
     self.okButton.hidden = YES;
+    self.effectButton.hidden = YES;
     self.cancelButton.hidden = YES;
     self.takePhotoButton.hidden = NO;
     self.selectPhotoButton.hidden = NO;
@@ -103,10 +111,14 @@
 - (void)finshTakePhoto
 {
     self.okButton.hidden = NO;
+    self.effectButton.hidden = NO;
     self.cancelButton.hidden = NO;
     self.takePhotoButton.hidden = YES;
     self.selectPhotoButton.hidden = YES;
     self.photoImageView.hidden = NO;
+    
+
+    self.effectImage = [_finishImage copy];
     self.photoImageView.image = _finishImage;
     //    if (_preview.superlayer) {
     //        [_preview removeFromSuperlayer];
@@ -176,11 +188,22 @@
     okBtn.backgroundColor = [UIColor clearColor];
     [okBtn setBackgroundImage:[UIImage imageNamed:@"camera_btn_ok"] forState:UIControlStateNormal];
     [okBtn setBackgroundImage:[UIImage imageNamed:@"camera_btn_ok_pressed"] forState:UIControlStateHighlighted];
-    [okBtn setFrame:CGRectMake(bottomView.width-buttonWidth-start, (bottomView.height-buttonWidth)/2, buttonWidth, buttonWidth)];
+    [okBtn setFrame:CGRectMake((bottomView.width-buttonWidth)/2, (bottomView.height-buttonWidth)/2, buttonWidth, buttonWidth)];
     [okBtn addTarget:self action:@selector(gotoController) forControlEvents:UIControlEventTouchUpInside];
     self.okButton = okBtn;
     okBtn.hidden = YES;
     [bottomView addSubview:okBtn];
+    
+    
+    UIButton *effectBtn = [UIButton buttonWithType:UIButtonTypeCustom];
+    effectBtn.backgroundColor = [UIColor clearColor];
+    [effectBtn setBackgroundImage:[UIImage imageNamed:@"camera_btn_ok"] forState:UIControlStateNormal];
+    [effectBtn setBackgroundImage:[UIImage imageNamed:@"camera_btn_ok_pressed"] forState:UIControlStateHighlighted];
+    [effectBtn setFrame:CGRectMake(bottomView.width-buttonWidth-start, (bottomView.height-buttonWidth)/2, buttonWidth, buttonWidth)];
+    [effectBtn addTarget:self action:@selector(addImageEffect) forControlEvents:UIControlEventTouchUpInside];
+    self.effectButton = effectBtn;
+    effectBtn.hidden = YES;
+    [bottomView addSubview:effectBtn];
     
     UIButton *cancleBtn = [UIButton buttonWithType:UIButtonTypeCustom];
     cancleBtn.backgroundColor = [UIColor clearColor];
@@ -340,6 +363,43 @@
         [_device unlockForConfiguration];
         [self.flashButton setEnabled:YES];
     }
+}
+- (void)initEffectScroll
+{
+    NSArray *effectArr = [NSArray arrayWithObjects:@"原图",@"LOMO",@"黑白",@"复古",@"哥特",@"锐化",@"淡雅",@"酒红",@"清宁",@"浪漫",@"光晕",@"蓝调",@"梦幻",@"夜色", nil];
+    UIScrollView *effectScroll = [[UIScrollView alloc] initWithFrame:CGRectMake(0, self.cameraView.height-bottom_height, PHONE_SCREEN_SIZE.width, bottom_height)];
+    effectScroll.backgroundColor = [UIColor clearColor];
+    effectScroll.showsHorizontalScrollIndicator = NO;
+    self.imageEffectScroll = effectScroll;
+    effectScroll.contentSize = CGSizeMake(10*(effectArr.count+1)+60*effectArr.count, bottom_height);
+    
+    for (int i = 0; i < effectArr.count; i++) {
+        UIImageView *imageView = [[UIImageView alloc] initWithFrame:CGRectMake(10+70*i, 0, bottom_height, bottom_height-10)];
+        imageView.backgroundColor = RGBACOLOR(0, 0, 120, 1.0);
+        [effectScroll addSubview:imageView];
+        imageView.tag = i+1;
+        imageView.userInteractionEnabled = YES;
+        
+        UILabel *lable = [[UILabel alloc] initWithFrame:CGRectMake(0, 15, bottom_height, 20)];
+//        lable.center = imageView.center;
+        lable.backgroundColor = [UIColor clearColor];
+        lable.textAlignment = UITextAlignmentCenter;
+        lable.font = [UIFont systemFontOfSize:14.0];
+        lable.textColor = [UIColor whiteColor];
+        lable.text = [effectArr objectAtIndex:i];
+        [imageView addSubview:lable];
+        [lable release];
+        
+        UITapGestureRecognizer *panGes = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(addEffect:)];
+        [imageView addGestureRecognizer:panGes];
+        [panGes release];
+        [imageView release];
+        
+    }
+    effectScroll.hidden = YES;
+    [self.cameraView.layer addSublayer:effectScroll.layer];
+    
+    
 }
 - (void)initWaterScroll
 {
@@ -530,10 +590,75 @@
 {
     [self goShareController];
 }
-
+- (void)addEffect:(UITapGestureRecognizer *)tagGes
+{
+    NSInteger tag = tagGes.view.tag;
+    NSLog(@"%d",tag);
+    if (effectTag == tag) {
+        
+    }else{
+        self.effectImage = [self.effectImage fixOrientation];
+        switch (tag) {
+            case 1:
+                
+                break;
+            case 2:
+                _finishImage = [UIImage imageWithImage:self.effectImage withColorMatrix:colormatrix_lomo];
+                break;
+            case 3:
+                _finishImage = [UIImage imageWithImage:self.effectImage withColorMatrix:colormatrix_heibai];
+                break;
+            case 4:
+                _finishImage = [UIImage imageWithImage:self.effectImage withColorMatrix:colormatrix_huajiu];
+                break;
+            case 5:
+                _finishImage = [UIImage imageWithImage:self.effectImage withColorMatrix:colormatrix_gete];
+                break;
+            case 6:
+                _finishImage = [UIImage imageWithImage:self.effectImage withColorMatrix:colormatrix_ruise];
+                break;
+            case 7:
+                _finishImage = [UIImage imageWithImage:self.effectImage withColorMatrix:colormatrix_danya];
+                break;
+            case 8:
+                _finishImage = [UIImage imageWithImage:self.effectImage withColorMatrix:colormatrix_jiuhong];
+                break;
+            case 9:
+                _finishImage = [UIImage imageWithImage:self.effectImage withColorMatrix:colormatrix_qingning];
+                break;
+            case 10:
+                _finishImage = [UIImage imageWithImage:self.effectImage withColorMatrix:colormatrix_langman];
+                break;
+            case 11:
+                _finishImage = [UIImage imageWithImage:self.effectImage withColorMatrix:colormatrix_guangyun];
+                break;
+            case 12:
+                _finishImage = [UIImage imageWithImage:self.effectImage withColorMatrix:colormatrix_landiao];
+                break;
+            case 13:
+                _finishImage = [UIImage imageWithImage:self.effectImage withColorMatrix:colormatrix_menghuan];
+                break;
+            case 14:
+                _finishImage = [UIImage imageWithImage:self.effectImage withColorMatrix:colormatrix_yese];
+                break;
+                
+            default:
+                break;
+        }
+        self.photoImageView.image = _finishImage;
+    }
+    effectTag = tag;
+    self.imageEffectScroll.hidden = YES;
+}
+- (void)addImageEffect
+{
+//    _finishImage = [_finishImage fixOrientation];
+//    _finishImage = [UIImage imageWithImage:_finishImage withColorMatrix:colormatrix_heibai];
+//    self.photoImageView.image = _finishImage;
+    self.imageEffectScroll.hidden = NO;
+}
 -(void)goShareController
 {
-
     UIView* view = [self creatBigSycView];
     if (view == nil) {
         return;

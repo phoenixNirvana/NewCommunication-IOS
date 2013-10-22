@@ -7,7 +7,8 @@
 //
 
 #import <UIKit/UIKit.h>
-
+#import <OpenGLES/ES1/gl.h>
+#import <OpenGLES/ES1/glext.h>
 @interface UIImage (LYAdditions)
 
 // 缩放图片
@@ -28,5 +29,8 @@
 +(UIImage*)scaleToSize:(UIImage*)image size:(CGSize)size;
 
 - (UIImage *)fixOrientation;
+
+//图片特效
++ (UIImage *)imageWithImage:(UIImage*)inImage withColorMatrix:(const float*)f;
 
 @end

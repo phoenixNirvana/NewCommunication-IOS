@@ -415,6 +415,7 @@
 		33CB38311743959800979F06 /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
 		33CB3833174395AA00979F06 /* CFNetwork.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CFNetwork.framework; path = System/Library/Frameworks/CFNetwork.framework; sourceTree = SDKROOT; };
 		33CB3835174395B500979F06 /* SenTestingKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SenTestingKit.framework; path = Library/Frameworks/SenTestingKit.framework; sourceTree = DEVELOPER_DIR; };
+		73BF5E6C18110711002C8DDD /* LYColorMatrix.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = LYColorMatrix.h; path = NewCommunication/LYCommon/LYColorMatrix.h; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -800,6 +801,7 @@
 				33891AA0174475830045075D /* UIDevice+LYAdditions.m */,
 				33891AA1174475830045075D /* UIImage+LYAdditions.h */,
 				33891AA2174475830045075D /* UIImage+LYAdditions.m */,
+				73BF5E6C18110711002C8DDD /* LYColorMatrix.h */,
 			);
 			path = Categories;
 			sourceTree = "<group>";
@@ -1286,7 +1288,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 6.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -1310,7 +1312,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 6.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
 				OTHER_CFLAGS = "-DNS_BLOCK_ASSERTIONS=1";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -1329,7 +1331,7 @@
 				GCC_PREFIX_HEADER = "NewCommunication/NewCommunication-Prefix.pch";
 				HEADER_SEARCH_PATHS = "\"$(SRCROOT)/NewCommunication/LYBaseLibs/AlixPay/Utilities\"";
 				INFOPLIST_FILE = "NewCommunication/NewCommunication-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
+				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/NewCommunication/LYBaseLibs/AlixPay\"",
@@ -1366,7 +1368,7 @@
 				GCC_PREFIX_HEADER = "NewCommunication/NewCommunication-Prefix.pch";
 				HEADER_SEARCH_PATHS = "\"$(SRCROOT)/NewCommunication/LYBaseLibs/AlixPay/Utilities\"";
 				INFOPLIST_FILE = "NewCommunication/NewCommunication-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
+				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/NewCommunication/LYBaseLibs/AlixPay\"",
